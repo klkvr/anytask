@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+    app:
+        build:
+            dockerfile: Dockerfile
+            context: .
+        restart: on-failure
+        environment:
+            EMAIL_HOST: mock_smtp
+            EMAIL_PORT: 2500
+            DATABASE_URL: mysql://anytask:anytask@mariadb/anytask
+            DJANGO_MANAGEPY_MIGRATE: "on"
+        env_file: app.env
+        user: "1000:1000"
+        ports:
+            - "8000:8000"
+            - "3031:3031"
+        volumes:
+            - "./anytask:/code/anytask"
+            - "./logs:/var/log/anytask"
+            - "./files:/var/lib/anytask"
+        depends_on:
+            - mariadb
+            - mock_smtp
+
+    mariadb:
+        image: mariadb:10.7.3
+        environment:
+            MARIADB_ROOT_PASSWORD: anytask
+            MARIADB_DATABASE: anytask
+            MARIADB_USER: anytask
+            MARIADB_PASSWORD: anytask
+        expose:
+            - "3306"
+        volumes:
+            - "./mariadb:/var/lib/mysql"
+    
+    mock_smtp:
+        image: inbucket/inbucket:stable
+        expose:
+            - 2500
+        ports:
+            - 9000:9000 # web interface

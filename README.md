@@ -18,3 +18,10 @@ To activate environment in already deployed project run
     . deploy_local_beta/activate.sh
 
 Run deploy_local_beta/run.sh -h for more information.
+
+## How to run locally in docker:
+1. Create `app.env` file in root directory:
+> cp app.env.example app.env
+2. Run containers:
+> docker-compose up -d
+3. Access website at `localhost:8000`, emails at `localhost:9000`. Logs are printed to `./logs/full.log`
