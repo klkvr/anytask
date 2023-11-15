@@ -9,7 +9,7 @@ set -e
 >&2 echo "Postgres is up - continuing"
 
 if [ "$DJANGO_MANAGEPY_MIGRATE" = "on" ]; then
-    /venv/bin/python manage.py migrate --noinput
+    python manage.py migrate --noinput
 fi
 
 chown 1000:1000 -R /var/log/anytask
