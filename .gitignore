@@ -65,3 +65,9 @@ sqlite3.db
 venv
 .idea/
 .vscode/
+
+# Docker files
+files/
+mariadb/
+logs/
+*.env

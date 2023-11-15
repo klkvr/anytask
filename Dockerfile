@@ -45,12 +45,9 @@ RUN set -ex \
         default-mysql-client \
     " \
     && apt-get update && apt-get install -y --no-install-recommends $BUILD_DEPS \
-    && pip install -U virtualenv \
-    && python3 -m virtualenv /venv \
-    && /venv/bin/pip install -U pip \
-    && /venv/bin/pip install --no-cache-dir -r /requirements.txt \
-    && /venv/bin/pip install --no-cache-dir dj_database_url==0.5.0 \
-    && /venv/bin/pip install --no-cache-dir uwsgi \
+    && pip install --no-cache-dir -r /requirements.txt \
+    && pip install --no-cache-dir dj_database_url==0.5.0 \
+    && pip install --no-cache-dir uwsgi \
 #    && /venv/bin/pip install --no-cache-dir -r /requirements_prod.txt \
     \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
@@ -75,14 +72,14 @@ ENV DJANGO_SETTINGS_MODULE=settings_docker
 
 # Call collectstatic (customize the following line with the minimal environment variables needed for manage.py to run):
 #RUN /venv/bin/python manage.py collectstatic --noinput
-RUN DATABASE_URL='mysql://user:pass@db/app_db' /venv/bin/python manage.py collectstatic --settings=settings_docker --noinput --no-post-process
-RUN DATABASE_URL='mysql://user:pass@db/app_db' /venv/bin/python manage.py compilemessages --settings=settings_docker
+RUN DATABASE_URL='mysql://user:pass@db/app_db' python manage.py collectstatic --settings=settings_docker --noinput --no-post-process
+RUN DATABASE_URL='mysql://user:pass@db/app_db' python manage.py compilemessages --settings=settings_docker
 
 # Tell uWSGI where to find your wsgi file (change this):
 ENV UWSGI_WSGI_FILE=wsgi.py
 
 # Base uWSGI configuration (you shouldn't need to change these):
-ENV UWSGI_VIRTUALENV=/venv UWSGI_HTTP=:8000 UWSGI_SOCKET=:3031 UWSGI_MASTER=1 UWSGI_HTTP_AUTO_CHUNKED=1 UWSGI_HTTP_KEEPALIVE=1 UWSGI_UID=1000 UWSGI_GID=2000 UWSGI_LAZY_APPS=1 UWSGI_WSGI_ENV_BEHAVIOR=holy
+ENV UWSGI_HTTP=:8000 UWSGI_SOCKET=:3031 UWSGI_MASTER=1 UWSGI_HTTP_AUTO_CHUNKED=1 UWSGI_HTTP_KEEPALIVE=1 UWSGI_LAZY_APPS=1 UWSGI_WSGI_ENV_BEHAVIOR=holy
 
 # Number of uWSGI workers and threads per worker (customize as needed):
 ENV UWSGI_WORKERS=16 UWSGI_THREADS=24
@@ -95,8 +92,10 @@ ENV UWSGI_STATIC_EXPIRES_URI=".*\.(css|js|png|jpg|jpeg|gif|ico|woff|ttf|otf|svg|
 
 RUN rm -rf /var/log/anytask/*
 
+USER 1000:1000
+
 # Uncomment after creating your docker-entrypoint.sh
 ENTRYPOINT ["/code/docker_entrypoint.sh"]
 
 # Start uWSGI
-CMD ["/venv/bin/uwsgi", "--show-config", "--static-map", "/static/=/var/lib/anytask/static", "--static-map", "/media/=/var/lib/anytask/media", "--mime-file", "mime.types", "--mime-file", "/etc/mime.types"]
+CMD ["uwsgi", "--show-config", "--static-map", "/static/=/var/lib/anytask/static", "--static-map", "/media/=/var/lib/anytask/media", "--mime-file", "mime.types", "--mime-file", "/etc/mime.types"]
