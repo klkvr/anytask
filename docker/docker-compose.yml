@@ -4,7 +4,7 @@ services:
   app:
     env_file: env.app
     restart: always
-    image: ghcr.io/znick/anytask:python3.8
+    image: $IMAGE
     links:
       - "mariadb:mariadb"
       - "rb_symlink:rb_symlink"
@@ -20,6 +20,7 @@ services:
         nofile:
            soft: 40000
            hard: 50000
+           
   ipython:
     restart: always
     env_file: env.ipython
@@ -28,6 +29,7 @@ services:
     ports:
       - "5555:5555"
       - "8888:8888"
+
   mariadb:
     restart: always
     env_file: env.mariadb
@@ -37,6 +39,7 @@ services:
     volumes:
       - "/var/lib/anytask/mariadb:/var/lib/mysql"
       - "/var/lib/anytask/mariadb_cfg:/etc/mysql/conf.d"
+
   rb:
     restart: always
     env_file: env.rb

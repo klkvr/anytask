@@ -1,0 +1,55 @@
+name: Publish Anytask image to Cotainer registry
+
+on: 
+    push: 
+        branches:
+            - master
+        tags:
+            - v*
+    workflow_dispatch:
+    
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:  
+    name: deploy image
+    runs-on: ubuntu-latest
+    environment:
+        name: ${{ (github.event_name == 'push' && github.ref_type == 'branch') && 'staging' || 'production' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+            images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Deploy
+        env:
+            IMAGE: ${{ steps.meta.outputs.tags }}
+        run: |
+          mkdir ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+          cd docker
+          echo "${{ secrets.APP_ENV }}" > env.app
+          echo "${{ secrets.IPYTHON_ENV }}" > env.ipython
+          echo "${{ secrets.MARIADB_ENV }}" > env.mysql
+          echo "${{ secrets.RB_ENV }}" > env.rb
+          echo "${{ secrets.EASYCI_ENV }}" > env.easyCI2
+
+          docker compose config | ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} docker compose -f - pull
+          docker compose config | ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} docker compose -f - down
+          docker compose config | ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} docker compose -f - rm -f -s
+          docker compose config | ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} docker compose -f - up -d --build
+
+        
+        
