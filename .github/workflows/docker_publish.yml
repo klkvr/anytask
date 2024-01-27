@@ -52,4 +52,5 @@ jobs:
       - name: Deploy
         env:
             TAG: ${{ steps.meta.outputs.tags }}
-        run: echo "Deploying $TAG image to environment"
+            ENV_NAME: ${{ secrets.NAME }}
+        run: echo "Deploying $TAG image to $ENV_NAME"
