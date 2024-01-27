@@ -41,7 +41,7 @@ jobs:
     name: deploy image
     runs-on: ubuntu-latest
     environment:
-        name: ${{ github.event_type == 'push' && "staging" || "production" }}
+        name: ${{ github.event_type == 'push' && 'staging' || 'production' }}
 
     steps:
       - name: Extract metadata (tags, labels) for Docker
