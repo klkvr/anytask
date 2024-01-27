@@ -50,4 +50,6 @@ jobs:
         with:
             images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
       - name: Deploy
-        run: echo "Deploying ${{ steps.meta.outputs.tags }} image to ${{ jobs.deploy.environment }} environment"
+        env:
+          DEPLOYMENT_ENV: ${{ jobs.deploy.environment }}
+        run: echo "Deploying ${{ steps.meta.outputs.tags }} image to $DEPLOYMENT_ENV environment"
