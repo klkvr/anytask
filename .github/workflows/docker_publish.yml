@@ -64,7 +64,7 @@ jobs:
           cd docker
           echo "${{ secrets.APP_ENV }}" > env.app
           echo "${{ secrets.IPYTHON_ENV }}" > env.ipython
-          echo "${{ secrets.MARIADB_ENV }}" > env.mysql
+          echo "${{ secrets.MARIADB_ENV }}" > env.mariadb
           echo "${{ secrets.RB_ENV }}" > env.rb
           echo "${{ secrets.EASYCI_ENV }}" > env.easyCI2
 
