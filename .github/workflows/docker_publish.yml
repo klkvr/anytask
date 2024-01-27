@@ -1,6 +1,13 @@
 name: Publish Anytask image to Cotainer registry
 
-on: [push, workflow_dispatch]
+on: 
+    push: 
+        branches:
+            - master
+        tags:
+            - v*
+    workflow_dispatch:
+    
 
 env:
   REGISTRY: ghcr.io
