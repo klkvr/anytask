@@ -7,7 +7,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  docker-publish:
+  publish:
     runs-on: ubuntu-20.04
 
     steps:
@@ -35,3 +35,19 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+  
+  deploy:  
+    needs: publish
+    name: deploy image
+    runs-on: ubuntu-latest
+    environment:
+        name: ${{ if github.event_type == 'push' }} staging ${{ else }} production ${{ endif }}
+
+    steps:
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+            images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Deploy
+        run: echo "Deploying ${{ steps.meta.outputs.tags }} image to ${{ jobs.deploy.environment }} environment"
